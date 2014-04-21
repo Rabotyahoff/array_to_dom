@@ -1,0 +1,13 @@
+// $Id$
+// vim:ft=javascript
+
+// If your extension references something external, use ARG_WITH
+// ARG_WITH("array_to_dom", "for array_to_dom support", "no");
+
+// Otherwise, use ARG_ENABLE
+// ARG_ENABLE("array_to_dom", "enable array_to_dom support", "no");
+
+if (PHP_ARRAY_TO_DOM != "no") {
+	EXTENSION("array_to_dom", "array_to_dom.c");
+}
+
