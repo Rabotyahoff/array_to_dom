@@ -1,13 +1,15 @@
 // $Id$
 // vim:ft=javascript
 
-// If your extension references something external, use ARG_WITH
-// ARG_WITH("array_to_dom", "for array_to_dom support", "no");
-
 // Otherwise, use ARG_ENABLE
-// ARG_ENABLE("array_to_dom", "enable array_to_dom support", "no");
+ARG_ENABLE("array_to_dom", "enable array_to_dom support", "no");
 
-if (PHP_ARRAY_TO_DOM != "no") {
-	EXTENSION("array_to_dom", "array_to_dom.c");
+if (PHP_array_to_dom != "no") {
+		EXTENSION("array_to_dom", "array_to_dom.c");
+		if (!ADD_EXTENSION_DEP("array_to_dom", "dom", true)) {
+				MESSAGE("\tDOM support in array_to_dom is disabled");
+		}
+		if (!ADD_EXTENSION_DEP("array_to_dom", "libxml", true)) {
+				ERROR("\tlibxml support is required for array_to_dom, but couldn't be enabled");
+		}
 }
-

@@ -28,11 +28,6 @@ make install  # or copy modules/array_to_dom.so manually
 phpize --clean
 
 
-If you have error on "libxml/tree.h" set path to libxml2
-CFLAGS=-I/usr/include/libxml2 ./configure
-CFLAGS=-I/usr/include/libxml2 make
-
-
 SYNOPSIS
 --------
 
