@@ -33,43 +33,43 @@ SYNOPSIS
 
 The code:
 
-	$arr=array();
-	$arr[]='first item';
-	$arr[]='second item';
-	$arr['bool_true']=true;
-	$arr['bool_false']=false;
-	$arr['old_name']=array('*'=>'new_name', '.'=>'val');//don't replace node name
-	$arr[]=array('*'=>'real_new_name', '.'=>'val');//set node name = 'real_new_name'
-	$arr['item']=array('*'=>'real_new_name2', '.'=>'val');//set node name = 'real_new_name2'
-	$arr['user']='vanya';
-	$arr['user2']=array('name'=>'vanya', 'lastname'=>'ivanov');
-	$obj=(object)array("prop" => "val");
-	$arr['obj']=$obj;
-	$arr['with_attr']=array('@attr'=>'val', '.'=>'val', '@int'=>666, '@int2'=>'777', '@int2'=>'776', '@double'=>1.2345, '@bool'=>true, '@bool'=>false );//set attributes
+  $arr=array();
+  $arr[]='first item';
+  $arr[]='second item';
+  $arr['bool_true']=true;
+  $arr['bool_false']=false;
+  $arr['old_name']=array('*'=>'new_name', '.'=>'val');//don't replace node name
+  $arr[]=array('*'=>'real_new_name', '.'=>'val');//set node name = 'real_new_name'
+  $arr['item']=array('*'=>'real_new_name2', '.'=>'val');//set node name = 'real_new_name2'
+  $arr['user']='vanya';
+  $arr['user2']=array('name'=>'vanya', 'lastname'=>'ivanov');
+  $obj=(object)array("prop" => "val");
+  $arr['obj']=$obj;
+  $arr['with_attr']=array('@attr'=>'val', '.'=>'val', '@int'=>666, '@int2'=>'777', '@int2'=>'776', '@double'=>1.2345, '@bool'=>true, '@bool'=>false );//set attributes
 
-	$doc = new DOMDocument('1.0', 'UTF-8');
-	$doc->formatOutput = true;
-	array_to_dom( $doc, $arr, "res");// "res" is optional, defaults to "root"
-	echo $doc->saveXML();
+  $doc = new DOMDocument('1.0', 'UTF-8');
+  $doc->formatOutput = true;
+  array_to_dom( $doc, $arr, "res");// "res" is optional, defaults to "root"
+  echo $doc->saveXML();
 
 prints:
 
-	<?xml version="1.0" encoding="UTF-8"?>
-	<res>
-		<item>first item</item>
-		<item>second item</item>
-		<bool_true>1</bool_true>
-		<bool_false/>
-		<old_name>val</old_name>
-		<real_new_name>val</real_new_name>
-		<real_new_name2>val</real_new_name2>
-		<user>vanya</user>
-		<user2>
-			<name>vanya</name>
-			<lastname>иванов</lastname>
-		</user2>
-		<obj>
-			<prop>val</prop>
-		</obj>
-		<with_attr attr="val" int="666" int2="776" double="1.2345" bool="">val</with_attr>
-	</res>
+  <?xml version="1.0" encoding="UTF-8"?>
+  <res>
+    <item>first item</item>
+    <item>second item</item>
+    <bool_true>1</bool_true>
+    <bool_false/>
+    <old_name>val</old_name>
+    <real_new_name>val</real_new_name>
+    <real_new_name2>val</real_new_name2>
+    <user>vanya</user>
+    <user2>
+      <name>vanya</name>
+      <lastname>иванов</lastname>
+    </user2>
+    <obj>
+      <prop>val</prop>
+    </obj>
+    <with_attr attr="val" int="666" int2="776" double="1.2345" bool="">val</with_attr>
+  </res>
