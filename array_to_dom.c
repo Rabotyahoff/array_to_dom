@@ -29,6 +29,10 @@
 #include "php_array_to_dom.h"
 #include "ext/libxml/php_libxml.h"
 
+//add support php5.3.6. Details https://github.com/php/php-src/commit/054e1cafa0f7d83bf9318431cc0ea54a5ff6afaf
+#define ZEND_FE_END     { NULL, NULL, NULL, 0, 0 }
+#define PHP_FE_END      ZEND_FE_END
+
 ZEND_BEGIN_ARG_INFO_EX(arginfo_array_to_dom, 0, 0, 2)
 	ZEND_ARG_OBJ_INFO(0, doc, DOMDocument, 0)
 	ZEND_ARG_INFO(0, var)
