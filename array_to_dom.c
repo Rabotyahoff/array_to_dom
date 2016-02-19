@@ -172,7 +172,7 @@ static void php_array_to_dom(xmlNodePtr node, zval *val);
 
 static void php_array_to_dom_array(xmlNodePtr node, zval **val) /* {{{ */
 {
-	/*HashTable *ht;
+	HashTable *ht;
 	double dbl;
 	int len;
 
@@ -224,7 +224,7 @@ static void php_array_to_dom_array(xmlNodePtr node, zval **val) /* {{{ */
 					switch (Z_TYPE_P(*data)) {
 						case IS_TRUE:
 						case IS_FALSE:
-							if (Z_BVAL_P(*data)) {
+							if (Z_TYPE_P(*data) == IS_TRUE) {
 								cur_val = BAD_CAST "1";
 								len = 1;
 							} else {
@@ -314,7 +314,7 @@ static void php_array_to_dom_array(xmlNodePtr node, zval **val) /* {{{ */
 				}
 			}//SUCCESS
 		}//for
-	}*/
+	}
 }
 
 static void php_array_to_dom(xmlNodePtr node, zval *val) /* {{{ */
@@ -331,17 +331,17 @@ static void php_array_to_dom(xmlNodePtr node, zval *val) /* {{{ */
 
 		case IS_TRUE:
 		case IS_FALSE:
-			if (Z_BVAL_P(val)) {
+			if (Z_TYPE_P(val) == IS_TRUE) {
 				text = xmlNewTextLen(BAD_CAST "1", 1);
 			} else {
 				// Nothing - "false" is an empty string, result is an empty node.
 			}
-			break;
+		break;
 
 		case IS_LONG:
 			len = sprintf(buf, "%ld", Z_LVAL_P(val));
 			text = xmlNewTextLen(BAD_CAST buf, len);
-			break;
+		break;
 
 		case IS_DOUBLE:
 			dbl = Z_DVAL_P(val);
@@ -359,7 +359,7 @@ static void php_array_to_dom(xmlNodePtr node, zval *val) /* {{{ */
 
 		case IS_ARRAY:
 		case IS_OBJECT:
-			//php_array_to_dom_array(node, &val);
+			php_array_to_dom_array(node, &val);
 			break;
 
 		default:
