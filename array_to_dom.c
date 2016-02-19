@@ -222,7 +222,8 @@ static void php_array_to_dom_array(xmlNodePtr node, zval **val) /* {{{ */
 					//Begin get current value
 					cur_val=NULL;
 					switch (Z_TYPE_P(*data)) {
-						case IS_BOOL:
+						case IS_TRUE:
+						case IS_FALSE:
 							if (Z_BVAL_P(*data)) {
 								cur_val = BAD_CAST "1";
 								len = 1;
@@ -318,7 +319,7 @@ static void php_array_to_dom_array(xmlNodePtr node, zval **val) /* {{{ */
 
 static void php_array_to_dom(xmlNodePtr node, zval *val) /* {{{ */
 {
-	/*xmlNodePtr text = NULL;
+	xmlNodePtr text = NULL;
 	int len;
 	char buf[128];
 	double dbl;
@@ -328,7 +329,8 @@ static void php_array_to_dom(xmlNodePtr node, zval *val) /* {{{ */
 		case IS_NULL:
 			break;
 
-		case IS_BOOL:
+		case IS_TRUE:
+		case IS_FALSE:
 			if (Z_BVAL_P(val)) {
 				text = xmlNewTextLen(BAD_CAST "1", 1);
 			} else {
@@ -357,7 +359,7 @@ static void php_array_to_dom(xmlNodePtr node, zval *val) /* {{{ */
 
 		case IS_ARRAY:
 		case IS_OBJECT:
-			php_array_to_dom_array(node, &val);
+			//php_array_to_dom_array(node, &val);
 			break;
 
 		default:
@@ -366,7 +368,7 @@ static void php_array_to_dom(xmlNodePtr node, zval *val) /* {{{ */
 
 	if (text != NULL) {
 		xmlAddChild(node, text);
-	}*/
+	}
 }
 /* }}} */
 
@@ -406,7 +408,7 @@ PHP_FUNCTION(array_to_dom)
 		xmlFreeNode(old_root_node);
 	}
 
-	//php_array_to_dom(root_node, var);
+	php_array_to_dom(root_node, var);
 }
 /* }}} */
 
