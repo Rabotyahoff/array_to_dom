@@ -186,7 +186,7 @@ static void php_array_to_dom_array(xmlNodePtr node, zval **val) /* {{{ */
 		return;
 	}
 
-	if (ht->nApplyCount > 1) {
+	if (ht->u.v.nApplyCount > 1) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "recursion detected");
 		return;
 	}
@@ -208,13 +208,13 @@ static void php_array_to_dom_array(xmlNodePtr node, zval **val) /* {{{ */
 
 			if (zend_hash_get_current_data_ex(ht, (void **)&data, &pos) == SUCCESS) {
 				HashTable *tmp_ht = HASH_OF(*data);
-				if (tmp_ht) tmp_ht->nApplyCount++;
+				if (tmp_ht) tmp_ht->u.v.nApplyCount++;
 
 				if (i == HASH_KEY_IS_STRING) {
 					if (key[0] == '\0' && Z_TYPE_PP(val) == IS_OBJECT) {
 						/* Skip protected and private members. */
 						if (tmp_ht) {
-							tmp_ht->nApplyCount--;
+							tmp_ht->u.v.nApplyCount--;
 						}
 						continue;
 					}
@@ -270,7 +270,7 @@ static void php_array_to_dom_array(xmlNodePtr node, zval **val) /* {{{ */
 						if (cur_val!=NULL && strcmp(node->name, "item")==0) xmlNodeSetName(node, cur_val);
 
 						if (tmp_ht) {
-							tmp_ht->nApplyCount--;
+							tmp_ht->u.v.nApplyCount--;
 						}
 						continue;
 					}
@@ -280,7 +280,7 @@ static void php_array_to_dom_array(xmlNodePtr node, zval **val) /* {{{ */
 						if (cur_val!=NULL) xmlNodeSetContentLen(node, cur_val, len);
 
 						if (tmp_ht) {
-							tmp_ht->nApplyCount--;
+							tmp_ht->u.v.nApplyCount--;
 						}
 						continue;
 					}
@@ -290,7 +290,7 @@ static void php_array_to_dom_array(xmlNodePtr node, zval **val) /* {{{ */
 						if (cur_val!=NULL && strlen(key)>1 ) xmlNewProp(node, BAD_CAST key + 1, cur_val);
 
 						if (tmp_ht) {
-							tmp_ht->nApplyCount--;
+							tmp_ht->u.v.nApplyCount--;
 						}
 						continue;
 					}
@@ -309,7 +309,7 @@ static void php_array_to_dom_array(xmlNodePtr node, zval **val) /* {{{ */
 				php_array_to_dom(e, *data);
 
 				if (tmp_ht) {
-					tmp_ht->nApplyCount--;
+					tmp_ht->u.v.nApplyCount--;
 				}
 			}//SUCCESS
 		}//for
