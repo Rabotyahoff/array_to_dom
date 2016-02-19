@@ -172,7 +172,7 @@ static void php_array_to_dom(xmlNodePtr node, zval *val);
 
 static void php_array_to_dom_array(xmlNodePtr node, zval **val) /* {{{ */
 {
-	HashTable *ht;
+	/*HashTable *ht;
 	double dbl;
 	int len;
 
@@ -212,14 +212,14 @@ static void php_array_to_dom_array(xmlNodePtr node, zval **val) /* {{{ */
 
 				if (i == HASH_KEY_IS_STRING) {
 					if (key[0] == '\0' && Z_TYPE_PP(val) == IS_OBJECT) {
-						/* Skip protected and private members. */
+						// Skip protected and private members.
 						if (tmp_ht) {
 							tmp_ht->u.v.nApplyCount--;
 						}
 						continue;
 					}
 
-					/*Begin get current value*/
+					//Begin get current value
 					cur_val=NULL;
 					switch (Z_TYPE_P(*data)) {
 						case IS_BOOL:
@@ -261,7 +261,7 @@ static void php_array_to_dom_array(xmlNodePtr node, zval **val) /* {{{ */
 						default:
 						break;
 					}
-					/*End get current value*/
+					//End get current value
 
 
 					//if key = "*" and node name = "item", set new node name
@@ -313,12 +313,12 @@ static void php_array_to_dom_array(xmlNodePtr node, zval **val) /* {{{ */
 				}
 			}//SUCCESS
 		}//for
-	}
+	}*/
 }
 
 static void php_array_to_dom(xmlNodePtr node, zval *val) /* {{{ */
 {
-	xmlNodePtr text = NULL;
+	/*xmlNodePtr text = NULL;
 	int len;
 	char buf[128];
 	double dbl;
@@ -366,7 +366,7 @@ static void php_array_to_dom(xmlNodePtr node, zval *val) /* {{{ */
 
 	if (text != NULL) {
 		xmlAddChild(node, text);
-	}
+	}*/
 }
 /* }}} */
 
@@ -376,18 +376,17 @@ static void php_array_to_dom(xmlNodePtr node, zval *val) /* {{{ */
 PHP_FUNCTION(array_to_dom)
 {
 	zval *id, *var;
-	char *root_element_name = NULL;
-	int root_element_len = 0;
+	zend_string *root_element_name;
 	xmlNodePtr nodep = NULL;
 	xmlDocPtr doc = NULL;
 	xmlNodePtr root_node = NULL, old_root_node;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "oz|s", &id, &var, &root_element_name, &root_element_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "oz|S", &id, &var, &root_element_name) == FAILURE) {
 		return;
 	}
 
-	if (!root_element_name || !php_is_valid_tag_name(root_element_name)) {
-		root_element_name = "root";
+	if (!root_element_name || !php_is_valid_tag_name(root_element_name->val)) {
+		root_element_name = zend_string_init("root", sizeof("root")-1, 0);
 	}
 
 	nodep = php_libxml_import_node(id TSRMLS_CC);
@@ -400,14 +399,14 @@ PHP_FUNCTION(array_to_dom)
 		RETURN_FALSE;
 	}
 
-	root_node = xmlNewNode(NULL, BAD_CAST root_element_name);
+	root_node = xmlNewNode(NULL, BAD_CAST root_element_name->val);
 	old_root_node = xmlDocSetRootElement(doc, root_node);
 	if (old_root_node != NULL) {
 		xmlUnlinkNode(old_root_node);
 		xmlFreeNode(old_root_node);
 	}
 
-	php_array_to_dom(root_node, var);
+	//php_array_to_dom(root_node, var);
 }
 /* }}} */
 
