@@ -170,16 +170,16 @@ static int php_is_valid_tag_name(char *s)
 
 static void php_array_to_dom(xmlNodePtr node, zval *val);
 
-static void php_array_to_dom_array(xmlNodePtr node, zval **val) /* {{{ */
+static void php_array_to_dom_array(xmlNodePtr node, zval *val) /* {{{ */
 {
 	HashTable *ht;
 	double dbl;
 	int len;
 
-	if (Z_TYPE_PP(val) == IS_ARRAY) {
-		ht = HASH_OF(*val);
+	if (Z_TYPE_P(val) == IS_ARRAY) {
+		ht = HASH_OF(val);
 	} else {
-		ht = Z_OBJPROP_PP(val);
+		ht = Z_OBJPROP_P(val);
 	}
 
 	if (ht == NULL) {
@@ -195,7 +195,7 @@ static void php_array_to_dom_array(xmlNodePtr node, zval **val) /* {{{ */
 		HashPosition pos;
 		int i;
 		char *key, *tag, buf[128], *cur_val;
-		zval **data;
+		zval *data;
 		ulong index;
 		uint key_len;
 		xmlNodePtr text;
@@ -206,12 +206,12 @@ static void php_array_to_dom_array(xmlNodePtr node, zval **val) /* {{{ */
 			i = zend_hash_get_current_key_ex(ht, &key, &key_len, &index, 0, &pos);
 			if (i == HASH_KEY_NON_EXISTANT) break;
 
-			if (zend_hash_get_current_data_ex(ht, (void **)&data, &pos) == SUCCESS) {
-				HashTable *tmp_ht = HASH_OF(*data);
+			if (zend_hash_get_current_data_ex(ht, (void *)&data, &pos) == SUCCESS) {
+				HashTable *tmp_ht = HASH_OF(data);
 				if (tmp_ht) tmp_ht->u.v.nApplyCount++;
 
 				if (i == HASH_KEY_IS_STRING) {
-					if (key[0] == '\0' && Z_TYPE_PP(val) == IS_OBJECT) {
+					if (key[0] == '\0' && Z_TYPE_P(val) == IS_OBJECT) {
 						// Skip protected and private members.
 						if (tmp_ht) {
 							tmp_ht->u.v.nApplyCount--;
@@ -221,10 +221,10 @@ static void php_array_to_dom_array(xmlNodePtr node, zval **val) /* {{{ */
 
 					//Begin get current value
 					cur_val=NULL;
-					switch (Z_TYPE_P(*data)) {
+					switch (Z_TYPE_P(data)) {
 						case IS_TRUE:
 						case IS_FALSE:
-							if (Z_TYPE_P(*data) == IS_TRUE) {
+							if (Z_TYPE_P(data) == IS_TRUE) {
 								cur_val = BAD_CAST "1";
 								len = 1;
 							} else {
@@ -235,12 +235,12 @@ static void php_array_to_dom_array(xmlNodePtr node, zval **val) /* {{{ */
 						break;
 
 						case IS_LONG:
-							len = sprintf(buf, "%ld", Z_LVAL_P(*data));
+							len = sprintf(buf, "%ld", Z_LVAL_P(data));
 							cur_val = BAD_CAST buf;
 						break;
 
 						case IS_DOUBLE:
-							dbl = Z_DVAL_P(*data);
+							dbl = Z_DVAL_P(data);
 							if (!zend_isinf(dbl) && !zend_isnan(dbl)) {
 								len = snprintf(buf, sizeof(buf), "%.*k", (int)EG(precision), dbl);
 							} else {
@@ -250,8 +250,8 @@ static void php_array_to_dom_array(xmlNodePtr node, zval **val) /* {{{ */
 						break;
 
 						case IS_STRING:
-							cur_val = BAD_CAST Z_STRVAL_P(*data);
-							len = Z_STRLEN_P(*data);
+							cur_val = BAD_CAST Z_STRVAL_P(data);
+							len = Z_STRLEN_P(data);
 						break;
 
 						case IS_ARRAY:
@@ -267,7 +267,7 @@ static void php_array_to_dom_array(xmlNodePtr node, zval **val) /* {{{ */
 
 					//if key = "*" and node name = "item", set new node name
 					if ( strcmp(key, "*")==0 ){
-						//xmlNodeSetName(node, BAD_CAST Z_STRVAL_P(*data));
+						//xmlNodeSetName(node, BAD_CAST Z_STRVAL_P(data));
 						if (cur_val!=NULL && strcmp(node->name, "item")==0) xmlNodeSetName(node, cur_val);
 
 						if (tmp_ht) {
@@ -307,7 +307,7 @@ static void php_array_to_dom_array(xmlNodePtr node, zval **val) /* {{{ */
 
 				//xmlNewChild(xmlNodePtr parent, xmlNsPtr ns, const xmlChar *name, const xmlChar *content);
 				e = xmlNewChild(node, NULL, BAD_CAST tag, NULL);
-				php_array_to_dom(e, *data);
+				php_array_to_dom(e, data);
 
 				if (tmp_ht) {
 					tmp_ht->u.v.nApplyCount--;
