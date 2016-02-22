@@ -1,6 +1,6 @@
 /*
 	+----------------------------------------------------------------------+
-	| PHP Version 5                                                        |
+	| PHP Version 7                                                        |
 	+----------------------------------------------------------------------+
 	| Copyright (c) 1997-2013 The PHP Group                                |
 	+----------------------------------------------------------------------+
@@ -15,6 +15,11 @@
 	| Author:                                                              |
 	+----------------------------------------------------------------------+
 */
+
+//php5 -> php7
+//demo ZEND_HASH_FOREACH_KEY_VAL https://github.com/Neeke/SeasLog/blob/391591210c24ce3d5a05523d4cabce00522b1eb8/seaslog.c
+//doc https://wiki.php.net/phpng-upgrading
+//article http://www.sklar.com/software/php/2015/03/23/converting-a-php-extension-to-php-7/
 
 /* $Id$ */
 

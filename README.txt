@@ -1,9 +1,11 @@
 array_to_dom: a simple PHP extension to convert nested arrays into DOMDocument
-Version: 1.00
+Version: 1.5
 Rabotyahoff Alexandr, http://ra-project.net, https://github.com/Rabotyahoff/array_to_dom
 
 Based on dom_varimport by Dmitry Koterov, http://en.dklab.ru/lib/dom_varimport/, https://github.com/DmitryKoterov/dom_varimport
 License: PHP License 3.01
+
+Support php7
 
 
 MOTIVATION
