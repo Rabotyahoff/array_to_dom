@@ -176,6 +176,7 @@ static void php_array_to_dom_array(xmlNodePtr node, zval *val) /* {{{ */
 	double dbl;
 	int len;
 
+	ZVAL_DEREF(val);
 	if (Z_TYPE_P(val) == IS_ARRAY) {
 		ht = HASH_OF(val);
 	} else {
@@ -192,128 +193,120 @@ static void php_array_to_dom_array(xmlNodePtr node, zval *val) /* {{{ */
 	}
 
 	if (zend_hash_num_elements(ht) > 0) {
-		HashPosition pos;
-		int i;
-		char *key, *tag, buf[128], *cur_val;
+		char *tag, buf[128], *cur_val;
 		zval *data;
-		ulong index;
-		uint key_len;
-		xmlNodePtr text;
+		zend_ulong num_key;
+		zend_string *str_key;
+
 		xmlNodePtr e;
 
-		zend_hash_internal_pointer_reset_ex(ht, &pos);
-		for (;; zend_hash_move_forward_ex(ht, &pos)) {
-			i = zend_hash_get_current_key_ex(ht, &key, &key_len, &index, 0, &pos);
-			if (i == HASH_KEY_NON_EXISTANT) break;
+		ZEND_HASH_FOREACH_KEY_VAL(ht, num_key, str_key, data) {
+			HashTable *tmp_ht = HASH_OF(data);
+			if (tmp_ht) tmp_ht->u.v.nApplyCount++;
 
-			if (zend_hash_get_current_data_ex(ht, (void *)&data, &pos) == SUCCESS) {
-				HashTable *tmp_ht = HASH_OF(data);
-				if (tmp_ht) tmp_ht->u.v.nApplyCount++;
-
-				if (i == HASH_KEY_IS_STRING) {
-					if (key[0] == '\0' && Z_TYPE_P(val) == IS_OBJECT) {
-						// Skip protected and private members.
-						if (tmp_ht) {
-							tmp_ht->u.v.nApplyCount--;
-						}
-						continue;
+			if (str_key) {//HASH_KEY_IS_STRING
+				if (ZSTR_VAL(str_key)[0] == '\0' && Z_TYPE_P(val) == IS_OBJECT) {
+					// Skip protected and private members.
+					if (tmp_ht) {
+						tmp_ht->u.v.nApplyCount--;
 					}
-
-					//Begin get current value
-					cur_val=NULL;
-					switch (Z_TYPE_P(data)) {
-						case IS_TRUE:
-						case IS_FALSE:
-							if (Z_TYPE_P(data) == IS_TRUE) {
-								cur_val = BAD_CAST "1";
-								len = 1;
-							} else {
-								// Nothing - "false" is an empty string, result is an empty node.
-								cur_val=BAD_CAST "";
-								len = 0;
-							}
-						break;
-
-						case IS_LONG:
-							len = sprintf(buf, "%ld", Z_LVAL_P(data));
-							cur_val = BAD_CAST buf;
-						break;
-
-						case IS_DOUBLE:
-							dbl = Z_DVAL_P(data);
-							if (!zend_isinf(dbl) && !zend_isnan(dbl)) {
-								len = snprintf(buf, sizeof(buf), "%.*k", (int)EG(precision), dbl);
-							} else {
-								len = sprintf(buf, "%f", dbl);
-							}
-							cur_val = BAD_CAST buf;
-						break;
-
-						case IS_STRING:
-							cur_val = BAD_CAST Z_STRVAL_P(data);
-							len = Z_STRLEN_P(data);
-						break;
-
-						case IS_ARRAY:
-						case IS_OBJECT:
-						case IS_NULL:
-						break;
-
-						default:
-						break;
-					}
-					//End get current value
-
-
-					//if key = "*" and node name = "item", set new node name
-					if ( strcmp(key, "*")==0 ){
-						//xmlNodeSetName(node, BAD_CAST Z_STRVAL_P(data));
-						if (cur_val!=NULL && strcmp(node->name, "item")==0) xmlNodeSetName(node, cur_val);
-
-						if (tmp_ht) {
-							tmp_ht->u.v.nApplyCount--;
-						}
-						continue;
-					}
-
-					//if key = ".", set content
-					if ( strcmp(key, ".")==0 ){
-						if (cur_val!=NULL) xmlNodeSetContentLen(node, cur_val, len);
-
-						if (tmp_ht) {
-							tmp_ht->u.v.nApplyCount--;
-						}
-						continue;
-					}
-
-					//if first symbol of key is "@", it's attribute
-					if ( key[0] == '@' ){
-						if (cur_val!=NULL && strlen(key)>1 ) xmlNewProp(node, BAD_CAST key + 1, cur_val);
-
-						if (tmp_ht) {
-							tmp_ht->u.v.nApplyCount--;
-						}
-						continue;
-					}
-
-					if (php_is_valid_tag_name(key)) tag = key;
-					else tag = "item";
-
-				}
-				else {
-					//key is number
-					tag = "item";
+					continue;
 				}
 
-				//xmlNewChild(xmlNodePtr parent, xmlNsPtr ns, const xmlChar *name, const xmlChar *content);
-				e = xmlNewChild(node, NULL, BAD_CAST tag, NULL);
-				php_array_to_dom(e, data);
+				//Begin get current value
+				cur_val=NULL;
+				ZVAL_DEREF(data);
+				switch (Z_TYPE_P(data)) {
+					case IS_TRUE:
+					case IS_FALSE:
+						if (Z_TYPE_P(data) == IS_TRUE) {
+							cur_val = BAD_CAST "1";
+							len = 1;
+						} else {
+							// Nothing - "false" is an empty string, result is an empty node.
+							cur_val=BAD_CAST "";
+							len = 0;
+						}
+					break;
 
-				if (tmp_ht) {
-					tmp_ht->u.v.nApplyCount--;
+					case IS_LONG:
+						len = sprintf(buf, "%ld", Z_LVAL_P(data));
+						cur_val = BAD_CAST buf;
+					break;
+
+					case IS_DOUBLE:
+						dbl = Z_DVAL_P(data);
+						if (!zend_isinf(dbl) && !zend_isnan(dbl)) {
+							len = snprintf(buf, sizeof(buf), "%.*k", (int)EG(precision), dbl);
+						} else {
+							len = sprintf(buf, "%f", dbl);
+						}
+						cur_val = BAD_CAST buf;
+					break;
+
+					case IS_STRING:
+						cur_val = BAD_CAST Z_STRVAL_P(data);
+						len = Z_STRLEN_P(data);
+					break;
+
+					case IS_ARRAY:
+					case IS_OBJECT:
+					case IS_NULL:
+					break;
+
+					default:
+					break;
 				}
-			}//SUCCESS
-		}//for
+				//End get current value
+
+
+				//if str_key = "*" and node name = "item", set new node name
+				if ( strcmp(ZSTR_VAL(str_key), "*")==0 ){
+					//xmlNodeSetName(node, BAD_CAST Z_STRVAL_P(data));
+					if (cur_val!=NULL && strcmp(node->name, "item")==0) xmlNodeSetName(node, cur_val);
+
+					if (tmp_ht) {
+						tmp_ht->u.v.nApplyCount--;
+					}
+					continue;
+				}
+
+				//if str_key = ".", set content
+				if ( strcmp(ZSTR_VAL(str_key), ".")==0 ){
+					if (cur_val!=NULL) xmlNodeSetContentLen(node, cur_val, len);
+
+					if (tmp_ht) {
+						tmp_ht->u.v.nApplyCount--;
+					}
+					continue;
+				}
+
+				//if first symbol of str_key is "@", it's attribute
+				if ( ZSTR_VAL(str_key)[0] == '@' ){
+					if (cur_val!=NULL && strlen(ZSTR_VAL(str_key))>1 ) xmlNewProp(node, BAD_CAST ZSTR_VAL(str_key) + 1, cur_val);
+
+					if (tmp_ht) {
+						tmp_ht->u.v.nApplyCount--;
+					}
+					continue;
+				}
+
+				if (php_is_valid_tag_name(ZSTR_VAL(str_key))) tag = ZSTR_VAL(str_key);
+				else tag = "item";
+			}
+			else {
+				//key is number
+				tag = "item";
+			}
+
+			//xmlNewChild(xmlNodePtr parent, xmlNsPtr ns, const xmlChar *name, const xmlChar *content);
+			e = xmlNewChild(node, NULL, BAD_CAST tag, NULL);
+			php_array_to_dom(e, data);
+
+			if (tmp_ht) {
+				tmp_ht->u.v.nApplyCount--;
+			}
+		} ZEND_HASH_FOREACH_END();
 	}
 }
 
@@ -324,10 +317,12 @@ static void php_array_to_dom(xmlNodePtr node, zval *val) /* {{{ */
 	char buf[128];
 	double dbl;
 
+	ZVAL_DEREF(val);
 	switch (Z_TYPE_P(val))
 	{
 		case IS_NULL:
-			break;
+			text = xmlNewTextLen(BAD_CAST "null", 4);
+		break;
 
 		case IS_TRUE:
 		case IS_FALSE:
@@ -351,19 +346,20 @@ static void php_array_to_dom(xmlNodePtr node, zval *val) /* {{{ */
 				len = sprintf(buf, "%f", dbl);
 			}
 			text = xmlNewTextLen(BAD_CAST buf, len);
-			break;
+		break;
 
 		case IS_STRING:
 			text = xmlNewTextLen(BAD_CAST Z_STRVAL_P(val), Z_STRLEN_P(val));
-			break;
+		break;
 
 		case IS_ARRAY:
 		case IS_OBJECT:
-			php_array_to_dom_array(node, &val);
-			break;
+			php_array_to_dom_array(node, val);
+		break;
 
 		default:
-			break;
+			text = xmlNewTextLen(BAD_CAST "defa", 4);
+		break;
 	}
 
 	if (text != NULL) {
