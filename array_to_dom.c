@@ -223,15 +223,13 @@ static void php_array_to_dom_array(xmlNodePtr node, zval *val) /* {{{ */
 				ZVAL_DEREF(data);
 				switch (Z_TYPE_P(data)) {
 					case IS_TRUE:
+						cur_val = BAD_CAST "1";
+						len = 1;
+					break;
 					case IS_FALSE:
-						if (Z_TYPE_P(data) == IS_TRUE) {
-							cur_val = BAD_CAST "1";
-							len = 1;
-						} else {
-							// Nothing - "false" is an empty string, result is an empty node.
-							cur_val=BAD_CAST "";
-							len = 0;
-						}
+						// Nothing - "false" is an empty string, result is an empty node.
+						cur_val=BAD_CAST "";
+						len = 0;
 					break;
 
 					case IS_LONG:
@@ -326,16 +324,15 @@ static void php_array_to_dom(xmlNodePtr node, zval *val) /* {{{ */
 	switch (Z_TYPE_P(val))
 	{
 		case IS_NULL:
-			text = xmlNewTextLen(BAD_CAST "null", 4);
+			text = xmlNewTextLen(BAD_CAST "", 0);
 		break;
 
 		case IS_TRUE:
+			text = xmlNewTextLen(BAD_CAST "1", 1);
+		break;
 		case IS_FALSE:
-			if (Z_TYPE_P(val) == IS_TRUE) {
-				text = xmlNewTextLen(BAD_CAST "1", 1);
-			} else {
-				// Nothing - "false" is an empty string, result is an empty node.
-			}
+			// Nothing - "false" is an empty string, result is an empty node.
+			text = xmlNewTextLen(BAD_CAST "", 0);
 		break;
 
 		case IS_LONG:
